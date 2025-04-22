@@ -1,67 +1,77 @@
 package org.hylastix.controller;
 
-
 import lombok.RequiredArgsConstructor;
-import org.hylastix.exception.ResourceNotFoundException;
-import org.hylastix.model.Item;
-import org.hylastix.repository.ItemRepository;
+import org.hylastix.dto.ItemDTO;
+import org.hylastix.service.ItemService;
+import org.hylastix.service.impl.ItemServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1/items")
 @RequiredArgsConstructor
 public class ItemController {
-    private final ItemRepository itemRepository;
 
-    @GetMapping("/items")
-    public List<Item> getAllItems() {
-        return itemRepository.findAll();
+    private static final Logger logger = LoggerFactory.getLogger(ItemServiceImpl.class);
+
+    private final ItemService itemService;
+
+    @GetMapping
+    public ResponseEntity<Page<ItemDTO>> getAllItems(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "timeStored") String sortBy,
+            @RequestParam(value = "sortDirection", defaultValue = "DESC") String sortDirection) {
+
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        Page<ItemDTO> itemPage = itemService.getAllItems(pageable);
+
+        return ResponseEntity.ok(itemPage);
     }
 
-    // create item rest api
-    @PostMapping("/items")
-    public Item createEmployee(@RequestBody Item item) {
-        // set the timeStored to the current date and time
-        item.setTimeStored(java.time.LocalDateTime.now());
-        return itemRepository.save(item);
+    @PostMapping
+    public ResponseEntity<ItemDTO> createItem(@Valid @RequestBody ItemDTO itemDTO) {
+        logger.info("Creating item with name: {}", itemDTO.getItemName());
+
+        ItemDTO createdItem = itemService.createItem(itemDTO);
+        return ResponseEntity.ok(createdItem);
     }
 
-    // get item by id rest api
-    @GetMapping("/items/{id}")
-    public ResponseEntity<Item> getEmployeeById(@PathVariable Long id) {
-        Item item = itemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Item not exist with id :" + id));
-        return ResponseEntity.ok(item);
+    @GetMapping("/{id}")
+    public ResponseEntity<ItemDTO> getItemById(@PathVariable Long id) {
+        logger.info("Fetching item with ID: {}", id);
+
+        ItemDTO itemDTO = itemService.getItemById(id);
+        return ResponseEntity.ok(itemDTO);
     }
 
-    // update item rest api
+    @PutMapping("/{id}")
+    public ResponseEntity<ItemDTO> updateItem(@PathVariable Long id, @Valid @RequestBody ItemDTO itemDTO) {
+        logger.info("Updating item with ID: {}", id);
 
-    @PutMapping("/items/{id}")
-    public ResponseEntity<Item> updateEmployee(@PathVariable Long id, @RequestBody Item itemDetails){
-        Item item = itemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Item not exist with id :" + id));
-
-        item.setItemName(itemDetails.getItemName());
-        item.setBestBefore(itemDetails.getBestBefore());
-        item.setQuantity(itemDetails.getQuantity());
-
-        Item updatedEmployee = itemRepository.save(item);
-        return ResponseEntity.ok(updatedEmployee);
+        ItemDTO updatedItem = itemService.updateItem(id, itemDTO);
+        return ResponseEntity.ok(updatedItem);
     }
 
-    // delete item rest api
-    @DeleteMapping("/items/{id}")
-    public ResponseEntity<Map<String, Boolean>> deleteEmployee(@PathVariable Long id){
-        Item item = itemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Item not exist with id :" + id));
+    // Delete item
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, Boolean>> deleteItem(@PathVariable Long id) {
+        logger.info("Deleting item with ID: {}", id);
 
-        itemRepository.delete(item);
+        itemService.deleteItem(id);
         Map<String, Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);
         return ResponseEntity.ok(response);
