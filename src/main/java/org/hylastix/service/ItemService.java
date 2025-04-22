@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface ItemService {
 
-    Page<ItemDTO> getAllItems(Pageable pageable);
+    Page<ItemDTO> getAllItems(Pageable pageable, String search);
 
     ItemDTO createItem(ItemDTO itemDTO);
 

@@ -20,8 +20,14 @@ public class ItemServiceImpl implements ItemService {
     private final ItemMapper itemMapper;
 
     @Override
-    public Page<ItemDTO> getAllItems(Pageable pageable) {
-        Page<Item> itemsPage = itemRepository.findAll(pageable);
+    public Page<ItemDTO> getAllItems(Pageable pageable, String search) {
+        Page<Item> itemsPage;
+
+        if (search != null && !search.isEmpty()) {
+            itemsPage = itemRepository.findByItemNameContainingIgnoreCase(search, pageable);
+        } else {
+            itemsPage = itemRepository.findAll(pageable);
+        }
 
         return itemsPage.map(itemMapper::toDTO);
     }

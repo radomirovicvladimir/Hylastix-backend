@@ -33,11 +33,12 @@ public class ItemController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "sortBy", defaultValue = "timeStored") String sortBy,
-            @RequestParam(value = "sortDirection", defaultValue = "DESC") String sortDirection) {
+            @RequestParam(value = "sortDirection", defaultValue = "DESC") String sortDirection,
+            @RequestParam(defaultValue = "") String search) {
 
         Sort.Direction direction = Sort.Direction.fromString(sortDirection);
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-        Page<ItemDTO> itemPage = itemService.getAllItems(pageable);
+        Page<ItemDTO> itemPage = itemService.getAllItems(pageable, search);
 
         return ResponseEntity.ok(itemPage);
     }

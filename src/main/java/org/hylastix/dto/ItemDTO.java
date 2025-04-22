@@ -15,7 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class ItemDTO {
-    
+
     private Long id;
 
     @NotBlank(message = "Item name must not be empty")
