@@ -28,4 +28,8 @@ public class Item {
 
     @Column(name = "best_before")
     private LocalDate bestBefore;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }
