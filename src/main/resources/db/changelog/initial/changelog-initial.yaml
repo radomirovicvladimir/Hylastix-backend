@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - logicalFilePath: db/changelog
+  - include:
+      file: db.changelog-user.xml
+      relativeToChangelogFile: true
+  - include:
+      file: db.changelog-item.xml
+      relativeToChangelogFile: true
+  - include:
+      file: db.changelog-deleted_item.xml
+      relativeToChangelogFile: true

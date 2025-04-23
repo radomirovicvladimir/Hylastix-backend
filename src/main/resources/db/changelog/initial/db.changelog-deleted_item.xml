@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="create-deleted-item-table" author="hylastix">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="deleted_item"/>
+            </not>
+        </preConditions>
+        <createTable tableName="deleted_item">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="item_name" type="VARCHAR(255)"/>
+            <column name="quantity" type="INT"/>
+            <column name="time_stored" type="DATETIME"/>
+            <column name="best_before" type="DATE"/>
+            <column name="deleted_at" type="DATETIME"/>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="fk-deleteditem-user" author="hylastix">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_deleted_item_user"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+                baseTableName="deleted_item"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_deleted_item_user"/>
+    </changeSet>
+
+    <changeSet id="index-deleteditem-user" author="hylastix">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_deleted_item_user_id"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="deleted_item" indexName="idx_deleted_item_user_id">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
