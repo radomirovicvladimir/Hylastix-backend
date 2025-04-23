@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.hylastix.dto.ItemDTO;
 import org.hylastix.mapper.ItemMapper;
 import org.hylastix.model.Item;
+import org.hylastix.model.User;
 import org.hylastix.repository.ItemRepository;
 import org.hylastix.service.ItemService;
 import org.springframework.data.domain.Page;
@@ -18,15 +19,19 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
     private final ItemMapper itemMapper;
+    private final UserDetailsServiceImpl userService;
 
     @Override
     public Page<ItemDTO> getAllItems(Pageable pageable, String search) {
+        User currentUser = userService.getCurrentUser();
+
         Page<Item> itemsPage;
 
         if (search != null && !search.isEmpty()) {
-            itemsPage = itemRepository.findByItemNameContainingIgnoreCase(search, pageable);
+            itemsPage = itemRepository
+                    .findByUserAndItemNameContainingIgnoreCase(currentUser, search, pageable);
         } else {
-            itemsPage = itemRepository.findAll(pageable);
+            itemsPage = itemRepository.findByUser(currentUser, pageable);
         }
 
         return itemsPage.map(itemMapper::toDTO);
@@ -36,6 +41,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDTO createItem(ItemDTO itemDTO) {
         Item item = itemMapper.toEntity(itemDTO);
         item.setTimeStored(java.time.LocalDateTime.now());
+        item.setUser(userService.getCurrentUser());
 
         Item savedItem = itemRepository.save(item);
 
