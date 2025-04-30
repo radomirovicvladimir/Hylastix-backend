@@ -2,7 +2,6 @@ package org.hylastix.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.hylastix.dto.DeletedItemDTO;
-import org.hylastix.model.DeletedItem;
 import org.hylastix.service.DeletedItemService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;

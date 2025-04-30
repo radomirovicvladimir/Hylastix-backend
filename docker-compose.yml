@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: hylastixDB
+      MYSQL_PASSWORD: gr@yman123
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - backend
+
+  springboot:
+    build: .
+    container_name: springboot-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: mysqldev
+      DATASOURCE_USERNAME: hylastixDB
+      DATASOURCE_PASSWORD: gr@yman123
+      JWTSECRET: 9000MetaraNaNebuSamJaZaTrenKadMiOsmehDas
+    depends_on:
+      - mysql
+    networks:
+      - backend
+
+volumes:
+  mysql_data:
+
+networks:
+  backend:
